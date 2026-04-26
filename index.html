@@ -1,16 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Calorie Tracker</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calorie Tracker</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-stone-50 text-green-950">
+  <div class="min-h-screen">
+
+    <header class="bg-green-800 text-white px-8 py-10">
+      <div class="max-w-5xl mx-auto">
+        <h1 class="text-4xl font-extrabold">Calorie Tracker</h1>
+        <p class="mt-3 text-lg text-green-100">
+          Track daily food intake, calorie totals, and historical eating patterns.
+        </p>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-8">
+
+      <section class="grid md:grid-cols-3 gap-5 mb-8">
+        <div class="bg-white rounded-2xl shadow p-5">
+          <h2 class="font-bold text-lg mb-2">Daily Tracking</h2>
+          <p class="text-sm text-gray-600">Log foods, portion sizes, and calories for each day.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-5">
+          <h2 class="font-bold text-lg mb-2">Historical Data</h2>
+          <p class="text-sm text-gray-600">Change dates to view previous calorie logs.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-5">
+          <h2 class="font-bold text-lg mb-2">Fitness Support</h2>
+          <p class="text-sm text-gray-600">Stay consistent with your nutrition and fitness goals.</p>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Log Food</h2>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-semibold mb-1">Date</label>
+            <input id="date" type="date" class="w-full border rounded-lg p-3" />
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1">Food</label>
+            <input id="food" type="text" placeholder="Chicken Bowl" class="w-full border rounded-lg p-3" />
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1">Quantity</label>
+            <input id="quantity" type="text" placeholder="1 bowl" class="w-full border rounded-lg p-3" />
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1">Calories</label>
+            <input id="calories" type="number" placeholder="650" class="w-full border rounded-lg p-3" />
+          </div>
+        </div>
+
+        <button onclick="addFood()" class="mt-5 bg-green-800 text-white px-6 py-3 rounded-lg font-bold">
+          Add Entry
+        </button>
+      </section>
+
+      <section class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow p-6">
+          <h2 class="text-xl font-bold mb-2">Daily Calories</h2>
+          <p id="selectedDate" class="text-sm text-gray-500 mb-3"></p>
+          <p id="total" class="text-5xl font-extrabold text-green-800">0 kcal</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Meals for Selected Date</h2>
+          <ul id="list" class="space-y-3"></ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    let data = JSON.parse(localStorage.getItem("calorieTrackerData")) || {};
+
+    const dateInput = document.getElementById("date");
+    const foodInput = document.getElementById("food");
+    const quantityInput = document.getElementById("quantity");
+    const caloriesInput = document.getElementById("calories");
+    const list = document.getElementById("list");
+    const totalEl = document.getElementById("total");
+    const selectedDateEl = document.getElementById("selectedDate");
+
+    dateInput.value = new Date().toISOString().split("T")[0];
+
+    function saveData() {
+      localStorage.setItem("calorieTrackerData", JSON.stringify(data));
+    }
+
+    function loadData() {
+      const date = dateInput.value;
+      const entries = data[date] || [];
+      let total = 0;
+
+      selectedDateEl.textContent = "Selected date: " + date;
+      list.innerHTML = "";
+
+      if (entries.length === 0) {
+        list.innerHTML = `<li class="text-gray-500">No meals logged for this date yet.</li>`;
+      }
+
+      entries.forEach((entry, index) => {
+        total += Number(entry.calories);
+
+        const li = document.createElement("li");
+        li.className = "bg-stone-100 rounded-xl p-4 flex justify-between items-center gap-4";
+
+        li.innerHTML = `
+          <div>
+            <p class="font-bold">${entry.food}</p>
+            <p class="text-sm text-gray-600">${entry.quantity || "No quantity entered"}</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-green-800">${entry.calories} kcal</p>
+            <button onclick="deleteFood(${index})" class="text-xs text-red-600 mt-1">Delete</button>
+          </div>
+        `;
+
+        list.appendChild(li);
+      });
+
+      totalEl.textContent = total + " kcal";
+    }
+
+    function addFood() {
+      const date = dateInput.value;
+      const food = foodInput.value.trim();
+      const quantity = quantityInput.value.trim();
+      const calories = caloriesInput.value.trim();
+
+      if (!date || !food || !calories) {
+        alert("Please enter a date, food name, and calories.");
+        return;
+      }
+
+      if (!data[date]) {
+        data[date] = [];
+      }
+
+      data[date].push({
+        food: food,
+        quantity: quantity,
+        calories: Number(calories)
+      });
+
+      saveData();
+
+      foodInput.value = "";
+      quantityInput.value = "";
+      caloriesInput.value = "";
+
+      loadData();
+    }
+
+    function deleteFood(index) {
+      const date = dateInput.value;
+      data[date].splice(index, 1);
+      saveData();
+      loadData();
+    }
+
+    dateInput.addEventListener("change", loadData);
+
+    loadData();
+  </script>
+</body>
 </html>
