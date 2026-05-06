@@ -17,8 +17,7 @@ The goal of this project was to practice front-end web development, UI design, a
 
 ## Technologies Used
 
-- HTML5
-- CSS3
+- Replit
 - GitHub
 - Azure Static Web Apps
 
