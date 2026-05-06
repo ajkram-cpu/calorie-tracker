@@ -1,4 +1,4 @@
-# Calorie Tracker
+# Calorie Tracker 🍎
 
 A responsive calorie tracking web application designed to help users monitor daily food intake and maintain healthy eating habits.
 
